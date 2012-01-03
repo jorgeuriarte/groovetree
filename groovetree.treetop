@@ -1,0 +1,77 @@
+grammar GrooveTree
+  rule groovyheader
+    header
+  end
+
+  rule header
+  	package imports {
+  		def content
+  			elements[0].content + elements[1].content
+  		end
+  	}
+  end
+
+  rule package
+    "package" space identifier eol lines? {
+  		def content
+     		elements[0].text_value + ' ' + elements[2].text_value + elements[3].content
+      	end
+    }
+  end
+
+  rule lines
+  	[ \t\r\n]+
+  end
+
+  rule imports
+  	import* {
+  		def content
+  			elements.inject("\n") do |text, e|
+  				text << e.content + "\n"
+  			end
+  		end
+  	}
+  end
+
+  rule import
+  	"import" space identifier eol {
+  		def content
+  			elements[0].text_value + ' ' + elements[2].text_value + ';'
+  		end
+  	}
+  end
+
+  rule block
+  	''
+  end
+
+  rule identifier
+	[A-Za-z0-9]+ {
+      def content
+        text_value
+      end
+    }  	
+  end
+
+  rule eol
+  	space? [;]? line_comment [\n]? {
+  		def content
+  			eoltext = elements[1].text_value
+  			eoltext + elements[2].text_value + "\n"
+	  	end
+  	}
+  end
+
+  rule line_comment
+  	space? ('//' [^\n]*)? {
+  		def content
+  			elements[1] + elements[2]
+  		end
+  	}
+  end
+  
+  rule space
+  	' '+
+  end
+
+end
